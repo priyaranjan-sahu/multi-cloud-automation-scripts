@@ -2,4 +2,4 @@
 # Install:  pip install -r aws/requirements.txt
 
 boto3>=1.28,<2.0
-botocore>=1.31,<2.0
+botocore>=1.43.93,<2.0
