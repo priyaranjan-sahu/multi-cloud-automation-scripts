@@ -1,4 +1,4 @@
 # GCP audit modules dependencies
 # Install:  pip install -r gcp/requirements.txt
 
-google-cloud-storage>=2.10,<3.0
+google-cloud-storage>=3.15.0,<4.0
