@@ -117,7 +117,7 @@ if ($outputDirectory -and -not (Test-Path -LiteralPath $outputDirectory)) {
 
 # Risk threshold constants
 $MAX_EXPIRY_DAYS = 90
-$RISKY_PERMISSIONS = @('rwdlacup', 'rwdlacu', 'rwdlac', 'rwdla', 'rw', 'rwd')
+$RISKY_PERMISSION_PATTERN = '[rwdlacup]{3,}'
 
 # Walk each subscription and collect SAS tokens.
 $report = [System.Collections.Generic.List[PSCustomObject]]::new()
@@ -154,7 +154,7 @@ foreach ($sub in $subscriptions) {
                     $httpsOnly = if ($protocolMatch -and $protocolMatch.Matches[0].Groups[1].Value -eq 'https') { $true } else { $false }
 
                     $daysToExpiry = if ($expiry) { [math]::Round(($expiry - (Get-Date)).TotalDays) } else { 9999 }
-                    $riskyPerm = $permissions -match '[rwdlacup]{3,}'
+                    $riskyPerm = $permissions -match $RISKY_PERMISSION_PATTERN
                     $risk = ($daysToExpiry -gt $MAX_EXPIRY_DAYS) -or $riskyPerm -or (-not $ipRestricted) -or (-not $httpsOnly)
 
                     $report.Add([PSCustomObject]@{
@@ -206,7 +206,7 @@ foreach ($sub in $subscriptions) {
                             $httpsOnly = if ($protocolMatch -and $protocolMatch.Matches[0].Groups[1].Value -eq 'https') { $true } else { $false }
 
                             $daysToExpiry = if ($expiry) { [math]::Round(($expiry - (Get-Date)).TotalDays) } else { 9999 }
-                            $riskyPerm = $permissions -match '[rwdl]{3,}'
+                            $riskyPerm = $permissions -match $RISKY_PERMISSION_PATTERN
                             $risk = ($daysToExpiry -gt $MAX_EXPIRY_DAYS) -or $riskyPerm -or (-not $ipRestricted) -or (-not $httpsOnly)
 
                             $report.Add([PSCustomObject]@{
@@ -243,10 +243,10 @@ foreach ($sub in $subscriptions) {
 
             # 3. User Delegation SAS (requires OAuth context)
             try {
-                $delegationKeys = Get-AzStorageAccount -ResourceGroupName $sa.ResourceGroupName -Name $sa.StorageAccountName | Get-AzStorageAccount -ErrorAction SilentlyContinue
+                Get-AzStorageAccount -ResourceGroupName $sa.ResourceGroupName -Name $sa.StorageAccountName | Get-AzStorageAccount -ErrorAction SilentlyContinue | Out-Null
                 # User Delegation SAS requires OAuth - skip if not available
             } catch {
-                # User Delegation SAS not available in this context
+                Write-Verbose "User Delegation SAS not available in this context"
             }
         }
     } catch {

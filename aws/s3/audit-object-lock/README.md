@@ -110,34 +110,39 @@ Read-only access is sufficient. The caller needs:
 For any bucket where `fully_protected` is `false`:
 
 1. **Enable Object Lock** (must be done at bucket creation — cannot be enabled on existing buckets):
-   ```bash
-   # Must be done at creation time
-   aws s3api create-bucket --bucket my-bucket --object-lock-enabled-for-bucket
-   ```
+
+    ```bash
+    # Must be done at creation time
+    aws s3api create-bucket --bucket my-bucket --object-lock-enabled-for-bucket
+    ```
 
 2. **Set default retention** (Governance mode allows privileged users to override; Compliance mode does not):
-   ```bash
-   # Governance mode, 90-day retention
-   aws s3api put-object-lock-configuration \
-       --bucket my-bucket \
-       --object-lock-configuration "ObjectLockEnabled=Enabled,Rule={DefaultRetention={Mode=GOVERNANCE,Days=90}}"
-   ```
+
+    ```bash
+    # Governance mode, 90-day retention
+    aws s3api put-object-lock-configuration \
+        --bucket my-bucket \
+        --object-lock-configuration "ObjectLockEnabled=Enabled,Rule={DefaultRetention={Mode=GOVERNANCE,Days=90}}"
+    ```
 
 3. **Enable Versioning** (required for Object Lock):
-   ```bash
-   aws s3api put-bucket-versioning --bucket my-bucket --versioning-configuration Status=Enabled
-   ```
+
+    ```bash
+    aws s3api put-bucket-versioning --bucket my-bucket --versioning-configuration Status=Enabled
+    ```
 
 4. **Apply Legal Hold** for indefinite retention on specific objects:
-   ```bash
-   aws s3api put-object-legal-hold --bucket my-bucket --key my-object --legal-hold Status=ON
-   ```
+
+    ```bash
+    aws s3api put-object-legal-hold --bucket my-bucket --key my-object --legal-hold Status=ON
+    ```
 
 5. **Transition to Compliance mode** for regulatory requirements (cannot be changed once set):
-   ```bash
-   aws s3api put-object-lock-configuration \
-       --bucket my-bucket \
-       --object-lock-configuration "ObjectLockEnabled=Enabled,Rule={DefaultRetention={Mode=COMPLIANCE,Days=365}}"
-   ```
+
+    ```bash
+    aws s3api put-object-lock-configuration \
+        --bucket my-bucket \
+        --object-lock-configuration "ObjectLockEnabled=Enabled,Rule={DefaultRetention={Mode=COMPLIANCE,Days=365}}"
+    ```
 
 > **Critical**: Object Lock can only be enabled at bucket creation time. For existing buckets without Object Lock, you must create a new bucket with Object Lock enabled and migrate data.

@@ -26,6 +26,7 @@ A SAS token is flagged **risky** when any of the following is true:
 4. **HTTP allowed** — Protocol not restricted to HTTPS only.
 
 Additionally, the audit surfaces the SAS policy configuration on each storage account:
+
 - `allowSharedKeyAccess` — Should be `false` to enforce SAS-only access.
 - `minimumTlsVersion` — Should be `TLS1_2` or higher.
 - `sasPolicy.sasExpirationPeriod` — Should be set and ≤ 90 days.
@@ -124,12 +125,15 @@ For any token flagged as `Risk = true`:
 3. **Add IP restriction** to your corporate egress CIDR.
 4. **Enforce HTTPS** (`spr=https`).
 5. **Configure account-level SAS policy** to enforce defaults:
-   ```bash
-   az storage account update -g <rg> -n <account> \
-       --sas-policy expiration-period 7d \
-       --sas-policy expiration-action Deny
-   ```
+
+    ```bash
+    az storage account update -g <rg> -n <account> \
+        --sas-policy expiration-period 7d \
+        --sas-policy expiration-action Deny
+    ```
+
 6. **Disable shared key access** to enforce SAS-only:
-   ```bash
-   az storage account update -g <rg> -n <account> --allow-shared-key-access false
-   ```
+
+    ```bash
+    az storage account update -g <rg> -n <account> --allow-shared-key-access false
+    ```
