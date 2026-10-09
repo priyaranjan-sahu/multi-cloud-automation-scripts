@@ -1,0 +1,31 @@
+// ==============================================================================
+// KQL Query: Find Azure Storage Accounts with SAS Policy Configuration
+// Target Service: Azure Resource Graph Explorer
+// Run in: portal.azure.com -> Resource Graph Explorer
+// ==============================================================================
+
+resources
+| where type =~ 'microsoft.storage/storageaccounts'
+| extend 
+    allowSharedKeyAccess = tobool(properties.allowSharedKeyAccess),
+    minimumTlsVersion = tostring(properties.minimumTlsVersion),
+    allowBlobPublicAccess = tobool(properties.allowBlobPublicAccess),
+    publicNetworkAccess = tostring(properties.publicNetworkAccess),
+    networkAcls = properties.networkAcls,
+    sasPolicy = properties.sasPolicy
+| project 
+    subscriptionId,
+    resourceGroup,
+    storageAccountName = name,
+    location,
+    sku = sku.name,
+    allowSharedKeyAccess,
+    minimumTlsVersion,
+    allowBlobPublicAccess,
+    publicNetworkAccess,
+    defaultAction = tostring(networkAcls.defaultAction),
+    virtualNetworkRules = networkAcls.virtualNetworkRules,
+    ipRules = networkAcls.ipRules,
+    sasPolicyExpirationAction = tostring(sasPolicy.expirationAction),
+    sasPolicySasExpirationPeriod = tostring(sasPolicy.sasExpirationPeriod)
+| sort by resourceGroup asc, storageAccountName asc
